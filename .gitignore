@@ -1,27 +1,24 @@
-# ── Secrets ──
-.env
-*.key
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# ── Node / web ──
-node_modules/
-web/dist/
+node_modules
+dist
+dist-ssr
 *.local
 
-# ── Python ──
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-
-# ── Pipeline ──
-# The scraping + extraction stage stays local. Nobody needs it to run the site:
-# its only output, web/public/data.js, is committed. Keeping it out also keeps
-# full scraped song texts from being redistributed here.
-pipeline/
-
-# ── Editor / OS ──
-.claude/settings.local.json
-.vscode/
-.idea/
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
