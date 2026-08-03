@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вселенная ATL</title>
+  <!-- ATL data injected as window.ATL -->
+  <script src="/data.js"></script>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div id="header">
+  <div id="title">ATL / ВСЕЛЕННАЯ</div>
+  <div id="controls">
+    <div id="depth-wrap">
+      <span id="depth-label">СЛОЙ</span>
+      <input id="depth" type="range" min="1" max="5" value="2">
+      <span id="depth-val"></span>
+    </div>
+    <div id="filters"></div>
+    <div id="search-wrap">
+      <input id="search" type="text" placeholder="поиск...">
+    </div>
+  </div>
+</div>
+
+<!-- ── UNIVERSE ── -->
+<div id="universe">
+  <svg id="svg"></svg>
+</div>
+
+<!-- ── STATUS ── -->
+<div id="status">
+  <span id="status-left"></span>
+  <span id="status-right"></span>
+</div>
+
+<!-- ── SIDE PANEL ── -->
+<div id="panel">
+  <button id="panel-close">×</button>
+  <div id="panel-type"></div>
+  <div id="panel-name"></div>
+  <div id="panel-meta"></div>
+  <div id="panel-desc"></div>
+  <div id="panel-body"></div>
+</div>
+
+<!-- ── WIKI OVERLAY ── -->
+<div id="wiki-overlay">
+  <div id="wiki-header">
+    <button id="wiki-back">← назад</button>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div id="wiki-type"></div>
+      <div id="wiki-name"></div>
+      <div id="wiki-meta"></div>
+    </div>
+    <button id="wiki-close">×</button>
+  </div>
+
+  <div id="wiki-body">
+    <!-- Left: description + origin -->
+    <div id="wiki-left">
+      <div id="wiki-desc"></div>
+      <div id="wiki-origin-wrap">
+        <div class="wiki-sec">Происхождение</div>
+        <div id="wiki-origin-text"></div>
+      </div>
+    </div>
+
+    <!-- Center: ego graph -->
+    <div id="wiki-center">
+      <div id="wiki-ego-label">Связи</div>
+      <div id="wiki-ego"></div>
+    </div>
+
+    <!-- Right: appearances + related -->
+    <div id="wiki-right">
+      <div id="wiki-ap-label">Появления</div>
+      <div id="wiki-appearances"></div>
+      <div id="wiki-related-wrap">
+        <div id="wiki-related-label">Встречается вместе</div>
+        <div id="wiki-related"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TIMELINE ── -->
+<div id="timeline">
+  <div id="tl-label">ХРОНОЛОГИЯ</div>
+  <div id="timeline-inner">
+    <svg id="timeline-svg"></svg>
+  </div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

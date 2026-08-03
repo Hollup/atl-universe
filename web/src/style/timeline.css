@@ -1,0 +1,43 @@
+/* ── TIMELINE ── */
+#timeline {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--timeline-h);
+  background: rgba(6,6,15,0.97);
+  border-top: 1px solid var(--border);
+  z-index: 200;
+  display: flex; flex-direction: column;
+}
+#tl-label {
+  font-size: 8px; letter-spacing: 3px; color: var(--dim);
+  padding: 8px 20px 0; text-transform: uppercase;
+  flex-shrink: 0;
+}
+#timeline-inner {
+  flex: 1; overflow-x: auto; overflow-y: hidden;
+  padding: 0 20px;
+}
+#timeline-svg { height: 100%; display: block; }
+
+/* Timeline tooltip */
+.tl-tip {
+  position: fixed;
+  background: rgba(6,6,15,0.97);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 10px 14px;
+  font-family: 'Courier New', monospace;
+  font-size: 10px; color: #bbb;
+  pointer-events: auto;
+  z-index: 300;
+  max-width: 220px;
+  line-height: 1.65;
+  display: none;
+}
+.tl-tip-name { color: #fff; font-size: 11px; margin-bottom: 2px; }
+.tl-tip-year { color: var(--dim); font-size: 8px; margin-bottom: 6px; }
+.tl-tip-song {
+  color: rgba(255,255,255,0.5); font-size: 9px;
+  cursor: pointer; padding: 1px 0;
+  transition: color 0.15s;
+}
+.tl-tip-song:hover { color: #fff; }
+.tl-tip-more { color: var(--dim); font-size: 8px; margin-top: 4px; }

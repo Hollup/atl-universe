@@ -1,0 +1,81 @@
+/* ── ZONE LABELS ── */
+.zone-label {
+  user-select: none;
+  cursor: pointer;
+  transition: fill-opacity 0.2s;
+}
+.zone-label:hover { fill-opacity: 0.6 !important; }
+
+/* ── LINKS ──
+   Resting state must stay visible — this is the one thing that makes the map
+   a graph rather than a scatter of dots. graph.js adds .highlighted/.dim only
+   while an entity is selected, so `.link` on its own is what you see 99% of
+   the time. (v1 carried the visible weight on a separate .link.visible class;
+   v2 has no such class, so it belongs here.) */
+.link {
+  fill: none;
+  stroke: rgba(255,255,255,0.12);
+  stroke-width: 1;
+  transition: stroke 0.25s, stroke-opacity 0.25s;
+}
+.link.highlighted {
+  stroke: rgba(255,255,255,0.55);
+  stroke-width: 1.5;
+}
+.link.dim {
+  stroke: rgba(255,255,255,0.03);
+}
+
+/* ── NODES ── */
+.node { cursor: pointer; }
+
+.node-core {
+  stroke: rgba(0,0,0,0.4);
+  stroke-width: 1;
+  transition: filter 0.15s, r 0.2s;
+}
+.node:hover .node-core {
+  filter: brightness(1.8) drop-shadow(0 0 6px currentColor);
+}
+
+.node.selected .node-core {
+  stroke: #fff;
+  stroke-width: 2;
+  filter: brightness(2) drop-shadow(0 0 10px currentColor);
+}
+.node.neighbor .node-core {
+  filter: brightness(1.4);
+}
+.node.faded {
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+/* Pulse animation ring */
+.node-pulse {
+  animation: pulse 3s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes pulse {
+  0%   { stroke-opacity: 0; r-factor: 1; }
+  40%  { stroke-opacity: 0.3; }
+  100% { stroke-opacity: 0; }
+}
+
+/* Node labels */
+.node-label {
+  transition: opacity 0.3s;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── STATUS BAR ── */
+#status {
+  position: fixed;
+  bottom: calc(var(--timeline-h) + 3px);
+  left: 0; right: 0;
+  font-size: 8.5px; letter-spacing: 1.5px; color: var(--dim);
+  padding: 0 20px;
+  pointer-events: none; z-index: 201;
+  display: flex; justify-content: space-between; align-items: center;
+}

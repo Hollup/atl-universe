@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Вселенная ATL</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #06060f;
+  --text: #d0d0d0;
+  --dim: #555;
+  --panel: rgba(6,6,15,0.95);
+  --border: rgba(255,255,255,0.06);
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  height: 100vh; width: 100vw;
+}
+
+/* ── HEADER ── */
+#header {
+  position: fixed; top: 0; left: 0; right: 0; height: 48px;
+  display: flex; align-items: center; gap: 0;
+  background: rgba(6,6,15,0.96);
+  border-bottom: 1px solid var(--border);
+  z-index: 200; backdrop-filter: blur(12px);
+}
+#title {
+  font-size: 11px; letter-spacing: 5px; color: #fff;
+  text-transform: uppercase; padding: 0 24px; white-space: nowrap;
+  border-right: 1px solid var(--border);
+}
+#controls {
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 20px; flex: 1;
+}
+
+/* Depth slider */
+#depth-wrap {
+  display: flex; align-items: center; gap: 10px;
+  border-right: 1px solid var(--border); padding-right: 16px;
+}
+#depth-label { font-size: 9px; letter-spacing: 2px; color: var(--dim); white-space: nowrap; }
+#depth {
+  -webkit-appearance: none; appearance: none;
+  width: 100px; height: 2px; background: rgba(255,255,255,0.1);
+  outline: none; cursor: pointer;
+}
+#depth::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 10px; height: 10px;
+  border-radius: 50%; background: #fff; cursor: pointer;
+}
+#depth-val { font-size: 9px; color: rgba(255,255,255,0.4); width: 40px; }
+
+/* Type filters */
+#filters { display: flex; gap: 6px; }
+.filter-btn {
+  padding: 3px 9px; border-radius: 2px; border: 1px solid currentColor;
+  background: transparent; font-family: inherit; font-size: 9px;
+  letter-spacing: 1px; cursor: pointer; text-transform: uppercase;
+  opacity: 0.35; transition: opacity 0.15s;
+}
+.filter-btn.active { opacity: 1; }
+
+/* Search */
+#search-wrap { margin-left: auto; }
+#search {
+  background: transparent; border: none; border-bottom: 1px solid var(--border);
+  color: var(--text); font-family: inherit; font-size: 11px;
+  padding: 4px 8px; width: 150px; outline: none; letter-spacing: 1px;
+}
+#search::placeholder { color: var(--dim); }
+
+/* ── CANVAS ── */
+#universe { position: fixed; top: 48px; left: 0; right: 0; bottom: 100px; }
+svg { width: 100%; height: 100%; }
+
+/* Zone labels */
+.zone-label {
+  font-family: 'Courier New', monospace; font-size: 10px;
+  letter-spacing: 4px; text-transform: uppercase;
+  fill: rgba(255,255,255,0.18); pointer-events: none; user-select: none;
+}
+
+/* Edges — invisible by default, shown on select */
+.link { stroke: rgba(255,255,255,0.0); stroke-width: 1; transition: stroke 0.2s; }
+.link.visible { stroke: rgba(255,255,255,0.12); }
+.link.highlighted { stroke: rgba(255,255,255,0.5); stroke-width: 1.5; }
+
+/* Nodes */
+.node circle {
+  stroke: rgba(0,0,0,0.5); stroke-width: 1;
+  cursor: pointer; transition: filter 0.15s, opacity 0.2s;
+}
+.node text {
+  font-family: 'Courier New', monospace; font-size: 8.5px;
+  fill: rgba(255,255,255,0.55); pointer-events: none;
+  text-anchor: middle; dominant-baseline: hanging;
+}
+.node:hover circle { filter: brightness(1.7); }
+.node:hover text { fill: rgba(255,255,255,0.9); }
+.node.selected circle { stroke: #fff; stroke-width: 2; filter: brightness(2) drop-shadow(0 0 8px currentColor); }
+.node.selected text { fill: #fff; font-size: 10px; }
+.node.faded { opacity: 0.07; pointer-events: none; }
+.node.faded circle { cursor: default; }
+
+/* ── TIMELINE ── */
+#timeline {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 100px;
+  background: rgba(6,6,15,0.97); border-top: 1px solid var(--border);
+  z-index: 200; display: flex; flex-direction: column;
+}
+#tl-label {
+  font-size: 8px; letter-spacing: 3px; color: var(--dim);
+  padding: 8px 20px 0; text-transform: uppercase;
+}
+#timeline-inner { flex: 1; overflow-x: auto; overflow-y: hidden; padding: 0 20px; }
+#timeline-svg { height: 100%; display: block; }
+
+/* ── PANEL ── */
+#panel {
+  position: fixed; top: 48px; right: 0; bottom: 100px; width: 280px;
+  background: var(--panel); border-left: 1px solid var(--border);
+  transform: translateX(100%); transition: transform 0.25s ease;
+  z-index: 150; overflow-y: auto; padding: 20px 18px;
+}
+#panel.open { transform: translateX(0); }
+#panel-close {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; color: var(--dim);
+  font-size: 16px; cursor: pointer; line-height: 1;
+}
+#panel-close:hover { color: #fff; }
+#panel-type { font-size: 8px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px; }
+#panel-name { font-size: 17px; color: #fff; margin-bottom: 4px; line-height: 1.3; }
+#panel-meta { font-size: 9px; color: var(--dim); letter-spacing: 1.5px; margin-bottom: 14px; }
+#panel-desc { font-size: 11px; line-height: 1.75; color: rgba(220,220,220,0.8); margin-bottom: 18px; }
+.sec { font-size: 8px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim);
+  border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 10px; margin-top: 16px; }
+.ap { margin-bottom: 10px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.1); }
+.ap-song { font-size: 10px; color: rgba(255,255,255,0.55); }
+.ap-year { font-size: 8px; color: var(--dim); margin-bottom: 3px; }
+.ap-quote { font-size: 10.5px; font-style: italic; color: var(--text); line-height: 1.55; }
+.conn-tag {
+  display: inline-block; margin: 3px 3px 0 0; padding: 3px 7px;
+  border: 1px solid rgba(255,255,255,0.1); font-size: 9px;
+  cursor: pointer; border-radius: 2px; transition: border-color 0.15s;
+}
+.conn-tag:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+
+/* ── STATUS ── */
+#status {
+  position: fixed; bottom: 103px; left: 0; right: 0;
+  font-size: 8.5px; letter-spacing: 1.5px; color: var(--dim);
+  padding: 0 20px; pointer-events: none; z-index: 201;
+  display: flex; justify-content: space-between; align-items: center;
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div id="title">ATL / ВСЕЛЕННАЯ</div>
+  <div id="controls">
+    <div id="depth-wrap">
+      <span id="depth-label">СЛОЙ</span>
+      <input id="depth" type="range" min="1" max="5" value="2">
+      <span id="depth-val"></span>
+    </div>
+    <div id="filters"></div>
+    <div id="search-wrap"><input id="search" type="text" placeholder="поиск..."></div>
+  </div>
+</div>
+
+<div id="universe"><svg id="svg"></svg></div>
+
+<div id="panel">
+  <button id="panel-close">×</button>
+  <div id="panel-type"></div>
+  <div id="panel-name"></div>
+  <div id="panel-meta"></div>
+  <div id="panel-desc"></div>
+  <div id="panel-body"></div>
+</div>
+
+<div id="status">
+  <span id="status-left"></span>
+  <span id="status-right"></span>
+</div>
+
+<div id="timeline">
+  <div id="tl-label">ХРОНОЛОГИЯ</div>
+  <div id="timeline-inner"><svg id="timeline-svg"></svg></div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="data.js"></script>
+<script>
+// ── ERROR OVERLAY ──
+window.onerror = (msg, src, line, col, err) => {
+  document.body.innerHTML = `<div style="padding:40px;font-family:monospace;color:#f55;background:#06060f;font-size:13px;white-space:pre-wrap">ERROR at line ${line}:\n${msg}\n\n${err?.stack||''}</div>`;
+  return true;
+};
+window.addEventListener('unhandledrejection', e => {
+  document.body.innerHTML = `<div style="padding:40px;font-family:monospace;color:#f55;background:#06060f;font-size:13px;white-space:pre-wrap">PROMISE ERROR:\n${e.reason}</div>`;
+});
+// Check data loaded
+if (typeof window.ATL === 'undefined') {
+  document.body.innerHTML = '<div style="padding:40px;font-family:monospace;color:#f55;background:#06060f">data.js failed to load — open via http://localhost:8765, not file://</div>';
+}
+</script>
+<script>
+const { zones, types, entities, edges, albums: songs } = window.ATL;
+
+// ── DEPTH LEVELS ── (min song_count to show)
+const DEPTH_LEVELS = [
+  { label: 'ЯДРО',       min: 4,  edgeMin: 6  },
+  { label: 'ОСНОВНОЕ',   min: 2,  edgeMin: 3  },
+  { label: 'РАЗВЁРНУТО', min: 1,  edgeMin: 2  },
+  { label: 'ДЕТАЛЬНО',   min: 1,  edgeMin: 1  },
+  { label: 'ВСЁ',        min: 0,  edgeMin: 0  },
+];
+
+// ── STATE ──
+let depthLevel = 1;        // index into DEPTH_LEVELS
+let activeTypes = new Set(Object.keys(types));
+let searchQuery = '';
+let selectedId = null;
+let activeYear = null;
+
+const entityMap = {};
+entities.forEach(e => entityMap[e.id] = e);
+
+const adjacency = {};
+edges.forEach(e => {
+  if (!adjacency[e.source]) adjacency[e.source] = [];
+  if (!adjacency[e.target]) adjacency[e.target] = [];
+  adjacency[e.source].push({ id: e.target, weight: e.weight });
+  adjacency[e.target].push({ id: e.source, weight: e.weight });
+});
+
+// ── DEPTH SLIDER ──
+const depthSlider = document.getElementById('depth');
+const depthVal    = document.getElementById('depth-val');
+
+function setDepth(v) {
+  depthLevel = v - 1;
+  depthVal.textContent = DEPTH_LEVELS[depthLevel].label;
+  rebuildGraph();
+}
+depthSlider.addEventListener('input', e => setDepth(+e.target.value));
+
+// ── TYPE FILTERS ──
+Object.entries(types).forEach(([type, meta]) => {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn active';
+  btn.textContent = meta.label;
+  btn.style.color = meta.color;
+  btn.style.borderColor = meta.color;
+  btn.addEventListener('click', () => {
+    activeTypes.has(type) ? activeTypes.delete(type) : activeTypes.add(type);
+    btn.classList.toggle('active');
+    updateVisibility();
+  });
+  document.getElementById('filters').appendChild(btn);
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  searchQuery = e.target.value.toLowerCase();
+  updateVisibility();
+});
+
+// ── SVG SETUP ──
+const svg        = d3.select('#svg');
+const zoomLayer  = svg.append('g');
+const zonesLayer = zoomLayer.append('g').attr('class', 'zones-bg');
+const linksLayer = zoomLayer.append('g').attr('class', 'links');
+const nodesLayer = zoomLayer.append('g').attr('class', 'nodes');
+
+const zoom = d3.zoom().scaleExtent([0.15, 5])
+  .on('zoom', e => zoomLayer.attr('transform', e.transform));
+svg.call(zoom).on('click', e => { if (e.target === svg.node()) deselect(); });
+
+// ── DEFS: zone gradients + filters ──
+const defs = svg.append('defs');
+const glow = defs.append('filter').attr('id', 'glow').attr('x','-50%').attr('y','-50%').attr('width','200%').attr('height','200%');
+glow.append('feGaussianBlur').attr('stdDeviation', 18).attr('result', 'blur');
+const merge = glow.append('feMerge');
+merge.append('feMergeNode').attr('in', 'blur');
+merge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+const softBlur = defs.append('filter').attr('id', 'soft').attr('x','-80%').attr('y','-80%').attr('width','260%').attr('height','260%');
+softBlur.append('feGaussianBlur').attr('stdDeviation', 55);
+
+Object.entries(zones).forEach(([id, z]) => {
+  const rg = defs.append('radialGradient').attr('id', `zg-${id}`);
+  rg.append('stop').attr('offset','0%').attr('stop-color', z.color).attr('stop-opacity', 0.85);
+  rg.append('stop').attr('offset','60%').attr('stop-color', z.color).attr('stop-opacity', 0.35);
+  rg.append('stop').attr('offset','100%').attr('stop-color', z.color).attr('stop-opacity', 0);
+});
+
+// ── ZONE BACKGROUNDS ──
+let zoneCircles = {}, zoneTexts = {};
+
+function drawZones(w, h) {
+  zonesLayer.selectAll('*').remove();
+  Object.entries(zones).forEach(([id, z]) => {
+    const cx = z.x * w, cy = z.y * h;
+    const r  = Math.min(w, h) * (z.r || 0.18);
+
+    // Soft glow blob
+    zoneCircles[id] = zonesLayer.append('circle')
+      .attr('cx', cx).attr('cy', cy).attr('r', r * 1.4)
+      .attr('fill', `url(#zg-${id})`)
+      .attr('filter', 'url(#soft)')
+      .attr('pointer-events', 'none');
+
+    // Inner ring
+    zonesLayer.append('circle')
+      .attr('cx', cx).attr('cy', cy).attr('r', r * 0.5)
+      .attr('fill', 'none')
+      .attr('stroke', z.color)
+      .attr('stroke-width', 0.5)
+      .attr('stroke-opacity', 0.25)
+      .attr('pointer-events', 'none');
+
+    // Label
+    zoneTexts[id] = zonesLayer.append('text')
+      .attr('class', 'zone-label')
+      .attr('x', cx).attr('y', cy - r * 0.55)
+      .attr('text-anchor', 'middle')
+      .text(z.name);
+  });
+}
+
+// ── FORCE SIMULATION ──
+let simulation, linkEls, nodeEls;
+let currentNodes = [], currentEdges = [];
+
+function getVisibleEntities() {
+  const { min } = DEPTH_LEVELS[depthLevel];
+  let ids = entities
+    .filter(e => e.song_count >= min && activeTypes.has(e.type))
+    .map(e => e.id);
+
+  if (searchQuery) {
+    ids = ids.filter(id => {
+      const e = entityMap[id];
+      return e.name.toLowerCase().includes(searchQuery) ||
+             (e.description || '').toLowerCase().includes(searchQuery);
+    });
+  }
+  if (activeYear !== null) {
+    const ySet = new Set(songs.filter(s => s.year === activeYear).flatMap(s => s.entities));
+    ids = ids.filter(id => ySet.has(id));
+  }
+  return new Set(ids);
+}
+
+function rebuildGraph() {
+  if (simulation) simulation.stop();
+
+  const { w, h } = dims();
+  const visibleIds = getVisibleEntities();
+  const { edgeMin } = DEPTH_LEVELS[depthLevel];
+
+  currentNodes = entities
+    .filter(e => visibleIds.has(e.id))
+    .map(e => {
+      const z = zones[e.zone] || zones['переход'];
+      const existing = currentNodes.find(n => n.id === e.id);
+      return existing || {
+        ...e,
+        x: z.x * w + (Math.random() - 0.5) * w * 0.2,
+        y: z.y * h + (Math.random() - 0.5) * h * 0.2,
+      };
+    });
+
+  const nodeSet = new Set(currentNodes.map(n => n.id));
+  currentEdges = edges
+    .filter(e => e.weight >= edgeMin && nodeSet.has(e.source) && nodeSet.has(e.target));
+
+  // ── DRAW LINKS ──
+  linkEls = linksLayer.selectAll('.link')
+    .data(currentEdges, d => `${d.source}||${d.target}`)
+    .join('line').attr('class', 'link');
+
+  // ── DRAW NODES ──
+  const ng = nodesLayer.selectAll('.node')
+    .data(currentNodes, d => d.id)
+    .join(
+      enter => {
+        const g = enter.append('g').attr('class', 'node');
+        g.append('circle');
+        g.append('text');
+        return g;
+      },
+      update => update,
+      exit => exit.remove()
+    )
+    .call(d3.drag()
+      .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+      .on('drag',  (e, d) => { d.fx=e.x; d.fy=e.y; })
+      .on('end',   (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx=null; d.fy=null; }))
+    .on('click', (e, d) => { e.stopPropagation(); selectEntity(d.id); });
+
+  ng.select('circle')
+    .attr('r', d => nodeR(d))
+    .attr('fill', d => types[d.type]?.color ?? '#888');
+
+  ng.select('text')
+    .text(d => d.name)
+    .attr('y', d => nodeR(d) + 3);
+
+  nodeEls = ng;
+
+  // ── SIMULATION ──
+  simulation = d3.forceSimulation(currentNodes)
+    .force('link', d3.forceLink(currentEdges).id(d => d.id).distance(70).strength(0.3))
+    .force('charge', d3.forceManyBody().strength(d => -80 - nodeR(d) * 8))
+    .force('collision', d3.forceCollide(d => nodeR(d) + 6))
+    .force('zone', zoneForce(w, h, 0.18))
+    .on('tick', ticked);
+
+  updateStatus();
+}
+
+function zoneForce(w, h, strength) {
+  return alpha => {
+    currentNodes.forEach(n => {
+      const z = zones[n.zone] || zones['переход'];
+      n.vx += (z.x * w - n.x) * strength * alpha;
+      n.vy += (z.y * h - n.y) * strength * alpha;
+    });
+  };
+}
+
+function nodeR(d) { return 4 + Math.sqrt(Math.max(d.song_count || 1, 1)) * 2.2; }
+
+function ticked() {
+  linkEls
+    .attr('x1', d => d.source.x ?? 0).attr('y1', d => d.source.y ?? 0)
+    .attr('x2', d => d.target.x ?? 0).attr('y2', d => d.target.y ?? 0);
+  nodeEls.attr('transform', d => `translate(${d.x ?? 0},${d.y ?? 0})`);
+}
+
+function dims() {
+  const el = document.getElementById('universe');
+  return { w: el.clientWidth, h: el.clientHeight };
+}
+
+// ── VISIBILITY (filter within current graph) ──
+function updateVisibility() {
+  if (!nodeEls) return;
+  const visible = getVisibleEntities();
+
+  if (selectedId) {
+    const neighbors = new Set((adjacency[selectedId] || []).map(e => e.id));
+    nodeEls.classed('faded', d => d.id !== selectedId && !neighbors.has(d.id));
+    linkEls
+      .classed('visible', false)
+      .classed('highlighted', d => {
+        const src = d.source.id ?? d.source;
+        const tgt = d.target.id ?? d.target;
+        return src === selectedId || tgt === selectedId;
+      });
+  } else {
+    nodeEls.classed('faded', d => !visible.has(d.id));
+    linkEls.classed('visible', false).classed('highlighted', false);
+  }
+}
+
+// ── SELECT ──
+function selectEntity(id) {
+  selectedId = id;
+  const entity = entityMap[id];
+  if (!entity) return;
+
+  nodeEls?.classed('selected', d => d.id === id);
+  updateVisibility();
+
+  // Panel
+  const meta = types[entity.type];
+  document.getElementById('panel-type').textContent = meta?.label ?? entity.type;
+  document.getElementById('panel-type').style.color = meta?.color ?? '#888';
+  document.getElementById('panel-name').textContent = entity.name;
+
+  const zname = zones[entity.zone]?.name ?? entity.zone ?? '';
+  const realm = entity.realm ? ` · ${entity.realm}` : '';
+  document.getElementById('panel-meta').textContent =
+    `${zname}${realm} · ${entity.first_year || ''}${entity.last_year && entity.last_year !== entity.first_year ? '–' + entity.last_year : ''}`;
+
+  document.getElementById('panel-desc').textContent = entity.description || '';
+
+  const body = document.getElementById('panel-body');
+  body.innerHTML = '';
+
+  // Origin
+  if (entity.origin) {
+    body.innerHTML += `<div class="sec">Происхождение</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:14px;line-height:1.6">${entity.origin}</div>`;
+  }
+
+  // Appearances
+  const apps = (entity.appearances || []).filter(a => a.excerpt).sort((a,b) => (a.year||9999)-(b.year||9999));
+  if (apps.length) {
+    body.innerHTML += `<div class="sec">Появления (${apps.length})</div>`;
+    apps.forEach(ap => {
+      body.innerHTML += `<div class="ap">
+        <div class="ap-song">${ap.song}</div>
+        <div class="ap-year">${ap.album}${ap.year ? ' · ' + ap.year : ''}</div>
+        <div class="ap-quote">«${ap.excerpt}»</div>
+      </div>`;
+    });
+  }
+
+  // Connections
+  const nbrs = adjacency[id] || [];
+  if (nbrs.length) {
+    body.innerHTML += `<div class="sec">Связи (${nbrs.length})</div><div id="conn-tags"></div>`;
+    const wrap = body.querySelector('#conn-tags');
+    nbrs.sort((a,b) => b.weight - a.weight).forEach(({ id: nid }) => {
+      const ne = entityMap[nid];
+      if (!ne) return;
+      const span = document.createElement('span');
+      span.className = 'conn-tag';
+      span.style.color = types[ne.type]?.color ?? '#888';
+      span.style.borderColor = types[ne.type]?.color + '55' ?? '#333';
+      span.textContent = ne.name;
+      span.addEventListener('click', () => selectEntity(nid));
+      wrap.appendChild(span);
+    });
+  }
+
+  document.getElementById('panel').classList.add('open');
+}
+
+function deselect() {
+  selectedId = null;
+  nodeEls?.classed('selected', false);
+  updateVisibility();
+  document.getElementById('panel').classList.remove('open');
+}
+document.getElementById('panel-close').addEventListener('click', deselect);
+
+// ── STATUS ──
+function updateStatus() {
+  const lv = DEPTH_LEVELS[depthLevel];
+  document.getElementById('status-left').textContent =
+    `СЛОЙ ${depthLevel + 1}: ${lv.label} · ${currentNodes.length} сущностей · ${currentEdges.length} связей`;
+  document.getElementById('status-right').textContent =
+    `всего ${entities.length} сущностей в архиве`;
+}
+
+// ── TIMELINE ──
+function buildTimeline() {
+  const tlSvg = d3.select('#timeline-svg');
+  tlSvg.selectAll('*').remove();
+
+  const h = 72, pad = 20;
+  const albumSet = {};
+  songs.filter(s => s.year > 0).forEach(s => {
+    const key = `${s.album}||${s.year}`;
+    if (!albumSet[key]) albumSet[key] = { name: s.album, year: s.year, entities: [] };
+    s.entities.forEach(e => { if (!albumSet[key].entities.includes(e)) albumSet[key].entities.push(e); });
+  });
+  const albumList = Object.values(albumSet).sort((a,b) => a.year - b.year);
+  const years = [...new Set(albumList.map(a => a.year))].sort((a,b)=>a-b);
+
+  const colW = 110;
+  const totalW = years.length * colW + pad * 2;
+  tlSvg.attr('width', totalW).attr('height', h);
+
+  const xScale = d3.scaleLinear()
+    .domain([years[0], years[years.length-1]])
+    .range([pad + colW/2, totalW - pad - colW/2]);
+
+  // Baseline
+  tlSvg.append('line')
+    .attr('x1', pad).attr('x2', totalW - pad)
+    .attr('y1', h - 22).attr('y2', h - 22)
+    .attr('stroke', 'rgba(255,255,255,0.05)');
+
+  // Activity bars
+  const byYear = {};
+  years.forEach(y => {
+    byYear[y] = new Set(albumList.filter(a => a.year === y).flatMap(a => a.entities)).size;
+  });
+  const maxAct = Math.max(...Object.values(byYear));
+  const barH = 32;
+
+  tlSvg.selectAll('.act-bar').data(years).join('rect')
+    .attr('x', y => xScale(y) - colW * 0.38)
+    .attr('width', colW * 0.76)
+    .attr('y', y => h - 22 - (byYear[y]/maxAct)*barH)
+    .attr('height', y => (byYear[y]/maxAct)*barH)
+    .attr('fill', y => activeYear === y ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.04)')
+    .attr('rx', 1);
+
+  // Year labels
+  tlSvg.selectAll('.yr-lbl').data(years).join('text')
+    .attr('x', y => xScale(y)).attr('y', h - 6)
+    .attr('text-anchor', 'middle')
+    .attr('font-family', 'Courier New').attr('font-size', 8)
+    .attr('fill', y => activeYear === y ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)')
+    .attr('letter-spacing', 1)
+    .text(y => y);
+
+  // Album dots
+  const byYearAlbums = {};
+  albumList.forEach(a => {
+    if (!byYearAlbums[a.year]) byYearAlbums[a.year] = [];
+    byYearAlbums[a.year].push(a);
+  });
+
+  const dotData = albumList.map(a => {
+    const idx = byYearAlbums[a.year].indexOf(a);
+    const tot = byYearAlbums[a.year].length;
+    return { ...a, xOff: (idx - (tot-1)/2) * 7 };
+  });
+
+  let tip = null;
+  tlSvg.selectAll('.adot').data(dotData).join('circle')
+    .attr('class', 'adot')
+    .attr('cx', d => xScale(d.year) + d.xOff)
+    .attr('cy', h - 22)
+    .attr('r', 3.5)
+    .attr('fill', d => activeYear === d.year ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.12)')
+    .attr('stroke', d => activeYear === d.year ? '#fff' : 'rgba(255,255,255,0.2)')
+    .attr('stroke-width', 1)
+    .style('cursor', 'pointer')
+    .on('click', (e, d) => {
+      activeYear = (activeYear === d.year) ? null : d.year;
+      buildTimeline();
+      rebuildGraph();
+    })
+    .on('mouseenter', (e, d) => {
+      if (!tip) { tip = document.createElement('div'); tip.style.cssText = `position:fixed;background:rgba(6,6,15,.97);border:1px solid rgba(255,255,255,.1);padding:8px 12px;font-family:'Courier New',monospace;font-size:10px;color:#bbb;pointer-events:none;z-index:300;max-width:200px;line-height:1.6`; document.body.appendChild(tip); }
+      const ents = d.entities.slice(0,4).map(id => entityMap[id]?.name).filter(Boolean).join(', ');
+      tip.innerHTML = `<div style="color:#fff">${d.name}</div><div style="color:#555">${d.year}</div>${ents ? `<div style="font-size:9px;margin-top:4px;color:#777">${ents}</div>` : ''}`;
+      tip.style.left = (e.clientX + 10) + 'px';
+      tip.style.top  = (e.clientY - 60) + 'px';
+      tip.style.display = 'block';
+    })
+    .on('mouseleave', () => { if (tip) tip.style.display = 'none'; });
+}
+
+// ── INIT ──
+function init() {
+  setDepth(2);
+  const { w, h } = dims();
+  drawZones(w, h);
+  rebuildGraph();
+  buildTimeline();
+}
+
+init();
+
+window.addEventListener('resize', () => {
+  const { w, h } = dims();
+  drawZones(w, h);
+  if (simulation) {
+    simulation.force('zone', zoneForce(w, h, 0.18));
+    simulation.alpha(0.3).restart();
+  }
+  buildTimeline();
+});
+</script>
+</body>
+</html>
