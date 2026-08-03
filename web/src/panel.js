@@ -6,6 +6,7 @@
 import { zones, types, entityMap, adjacency } from './data.js';
 import { subscribe, setState } from './state.js';
 import { entityPath, wikiPath } from './router.js';
+import { highlightName } from './wiki.js';
 
 let panelEl;
 
@@ -54,13 +55,16 @@ function openPanel(id) {
     .sort((a, b) => (a.year || 9999) - (b.year || 9999));
 
   if (apps.length) {
+    const accent = meta?.color ?? 'rgba(255,255,255,0.3)';
     body.innerHTML += `<div class="sec">Появления (${apps.length})</div>`;
     apps.forEach(ap => {
       body.innerHTML += `
-        <div class="ap">
-          <div class="ap-song">${ap.song}</div>
-          <div class="ap-year">${ap.album}${ap.year ? ' · ' + ap.year : ''}</div>
-          <div class="ap-quote">«${ap.excerpt}»</div>
+        <div class="ap" style="border-left-color:${accent}">
+          <div class="ap-header">
+            <span class="ap-song">${ap.song}</span>
+            <span class="ap-year">${ap.album}${ap.year ? ' · ' + ap.year : ''}</span>
+          </div>
+          <div class="ap-quote">«${highlightName(ap.excerpt, entity.name)}»</div>
         </div>`;
     });
   }

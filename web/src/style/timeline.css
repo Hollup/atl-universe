@@ -7,11 +7,27 @@
   z-index: 200;
   display: flex; flex-direction: column;
 }
-#tl-label {
-  font-size: 8px; letter-spacing: 3px; color: var(--dim);
-  padding: 8px 20px 0; text-transform: uppercase;
+#tl-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 8px 20px 0;
   flex-shrink: 0;
 }
+#tl-label {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 3px; color: var(--dim);
+  text-transform: uppercase;
+}
+.tl-reset-btn {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  background: transparent; border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 2px; padding: 3px 10px; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tl-reset-btn:hover { color: #fff; border-color: rgba(255,255,255,0.45); }
+.tl-reset-btn[hidden] { display: none; }
+
 #timeline-inner {
   flex: 1; overflow-x: auto; overflow-y: hidden;
   padding: 0 20px;
@@ -24,20 +40,20 @@
   background: rgba(6,6,15,0.97);
   border: 1px solid rgba(255,255,255,0.1);
   padding: 10px 14px;
-  font-family: 'Courier New', monospace;
-  font-size: 10px; color: #bbb;
+  font-family: var(--font-sans);
+  font-size: 12px; color: #bbb;
   pointer-events: auto;
   z-index: 300;
-  max-width: 220px;
+  max-width: 260px;
   line-height: 1.65;
   display: none;
 }
-.tl-tip-name { color: #fff; font-size: 11px; margin-bottom: 2px; }
-.tl-tip-year { color: var(--dim); font-size: 8px; margin-bottom: 6px; }
+.tl-tip-name { color: #fff; font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.tl-tip-year { font-family: var(--font-mono); color: var(--dim); font-size: 10px; margin-bottom: 6px; }
 .tl-tip-song {
-  color: rgba(255,255,255,0.5); font-size: 9px;
+  color: rgba(255,255,255,0.55); font-size: 12px;
   cursor: pointer; padding: 1px 0;
   transition: color 0.15s;
 }
 .tl-tip-song:hover { color: #fff; }
-.tl-tip-more { color: var(--dim); font-size: 8px; margin-top: 4px; }
+.tl-tip-more { font-family: var(--font-mono); color: var(--dim); font-size: 10px; margin-top: 4px; }

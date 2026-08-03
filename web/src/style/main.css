@@ -3,17 +3,23 @@
 :root {
   --bg:      #06060f;
   --text:    #d0d0d0;
-  --dim:     #555;
+  --dim:     #6b6b6b;
   --panel:   rgba(6,6,15,0.96);
   --border:  rgba(255,255,255,0.06);
-  --header-h: 48px;
-  --timeline-h: 100px;
+  --header-h: 54px;
+  --timeline-h: 110px;
+
+  /* Readable sans for prose & UI copy; mono reserved for labels/tags/numbers
+     (the "sci-fi chrome" accents) so the readable text isn't fighting a
+     typewriter face for legibility. */
+  --font-sans: 'Segoe UI', -apple-system, 'Helvetica Neue', Roboto, Arial, sans-serif;
+  --font-mono: 'Cascadia Code', Consolas, 'SF Mono', ui-monospace, Menlo, monospace;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-sans);
   overflow: hidden;
   height: 100vh;
   width: 100vw;
@@ -30,7 +36,8 @@ body {
   backdrop-filter: blur(12px);
 }
 #title {
-  font-size: 11px; letter-spacing: 5px; color: #fff;
+  font-family: var(--font-mono);
+  font-size: 13px; letter-spacing: 4px; color: #fff;
   text-transform: uppercase; padding: 0 24px; white-space: nowrap;
   border-right: 1px solid var(--border);
 }
@@ -44,7 +51,7 @@ body {
   display: flex; align-items: center; gap: 10px;
   border-right: 1px solid var(--border); padding-right: 16px;
 }
-#depth-label { font-size: 9px; letter-spacing: 2px; color: var(--dim); white-space: nowrap; }
+#depth-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 2px; color: var(--dim); white-space: nowrap; }
 #depth {
   -webkit-appearance: none; appearance: none;
   width: 100px; height: 2px; background: rgba(255,255,255,0.1);
@@ -54,13 +61,13 @@ body {
   -webkit-appearance: none; width: 10px; height: 10px;
   border-radius: 50%; background: #fff; cursor: pointer;
 }
-#depth-val { font-size: 9px; color: rgba(255,255,255,0.4); width: 60px; }
+#depth-val { font-family: var(--font-mono); font-size: 11px; color: rgba(255,255,255,0.4); width: 68px; }
 
 /* Type filters */
 #filters { display: flex; gap: 6px; flex-wrap: wrap; }
 .filter-btn {
-  padding: 3px 9px; border-radius: 2px; border: 1px solid currentColor;
-  background: transparent; font-family: inherit; font-size: 9px;
+  padding: 4px 10px; border-radius: 2px; border: 1px solid currentColor;
+  background: transparent; font-family: var(--font-mono); font-size: 11px;
   letter-spacing: 1px; cursor: pointer; text-transform: uppercase;
   opacity: 0.35; transition: opacity 0.15s;
 }
@@ -70,8 +77,8 @@ body {
 #search-wrap { margin-left: auto; }
 #search {
   background: transparent; border: none; border-bottom: 1px solid var(--border);
-  color: var(--text); font-family: inherit; font-size: 11px;
-  padding: 4px 8px; width: 160px; outline: none; letter-spacing: 1px;
+  color: var(--text); font-family: var(--font-sans); font-size: 13px;
+  padding: 4px 8px; width: 180px; outline: none; letter-spacing: 0.3px;
 }
 #search::placeholder { color: var(--dim); }
 

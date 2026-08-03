@@ -141,7 +141,7 @@ function buildEgoGraph(centerId, centerColor) {
 
   nodeEl.append('text')
     .text(d => d.name)
-    .attr('font-family', "'Courier New', monospace")
+    .attr('font-family', "'Cascadia Code', Consolas, 'SF Mono', ui-monospace, Menlo, monospace")
     .attr('font-size', d => d.isCenter ? 10 : 8)
     .attr('fill', 'rgba(255,255,255,0.65)')
     .attr('text-anchor', 'middle')
@@ -174,9 +174,11 @@ function buildAppearances(id) {
     return;
   }
 
+  const accent = types[entity.type]?.color ?? 'rgba(255,255,255,0.3)';
   apps.forEach(ap => {
     const div = document.createElement('div');
     div.className = 'wiki-ap';
+    div.style.borderLeftColor = accent;
     div.innerHTML = `
       <div class="wiki-ap-header">
         <span class="wiki-ap-song">${ap.song}</span>
@@ -229,7 +231,7 @@ function buildRelated(id) {
   });
 }
 
-function highlightName(text, name) {
+export function highlightName(text, name) {
   if (!name || !text) return text;
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return text.replace(new RegExp(escaped, 'gi'), m => `<strong>${m}</strong>`);

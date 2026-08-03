@@ -67,7 +67,7 @@ export function initZones(svg, zoomLayer) {
     zoneTexts[id] = zonesLayer.append('text')
       .attr('class', 'zone-label')
       .attr('text-anchor', 'middle')
-      .attr('font-family', "'Courier New', monospace")
+      .attr('font-family', "'Cascadia Code', Consolas, 'SF Mono', ui-monospace, Menlo, monospace")
       .attr('font-size', 13)
       .attr('letter-spacing', 6)
       .attr('fill', '#fff')

@@ -7,9 +7,14 @@ import * as d3 from 'd3';
 import { entityMap, songs, songsByYear } from './data.js';
 import { getState, setState, subscribe } from './state.js';
 
+const MONO = "'Cascadia Code', Consolas, 'SF Mono', ui-monospace, Menlo, monospace";
+
 let tlSvg, tip, hideTimer;
 
 export function initTimeline() {
+  document.getElementById('tl-reset-year').addEventListener('click', () => {
+    setState({ activeYear: null, activeSongId: null });
+  });
   subscribe(['activeYear', 'activeSongId'], () => buildTimeline());
   buildTimeline();
 }
@@ -19,6 +24,11 @@ export function buildTimeline() {
   tlSvg.selectAll('*').remove();
 
   const { activeYear } = getState();
+
+  const resetBtn = document.getElementById('tl-reset-year');
+  resetBtn.hidden = activeYear == null;
+  resetBtn.textContent = activeYear == null ? '' : `× показать все годы (сейчас ${activeYear})`;
+
   const h = 72, pad = 20;
 
   // Dedupe albums
@@ -74,7 +84,7 @@ export function buildTimeline() {
     .attr('class', 'yr-lbl')
     .attr('x', y => xScale(y)).attr('y', h - 6)
     .attr('text-anchor', 'middle')
-    .attr('font-family', "'Courier New', monospace").attr('font-size', 8)
+    .attr('font-family', MONO).attr('font-size', 8)
     .attr('fill', y => activeYear === y ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.2)')
     .attr('letter-spacing', 1)
     .text(y => y);

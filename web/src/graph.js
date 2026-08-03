@@ -188,8 +188,8 @@ export function rebuildGraph() {
     .text(d => d.name)
     .attr('y', d => nodeR(d) + 4)
     .attr('text-anchor', 'middle')
-    .attr('font-family', "'Courier New', monospace")
-    .attr('font-size', 9)
+    .attr('font-family', "'Cascadia Code', Consolas, 'SF Mono', ui-monospace, Menlo, monospace")
+    .attr('font-size', 10)
     .attr('fill', 'rgba(255,255,255,0.55)')
     .attr('pointer-events', 'none');
 
